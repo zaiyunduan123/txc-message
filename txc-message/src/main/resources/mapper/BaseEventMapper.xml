@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yx.tx.service.BaseEventMapper">
+    <resultMap id="BaseResultMap" type="com.yx.tx.domain.TxEvent">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="event_type" property="eventType" jdbcType="VARCHAR"/>
+        <result column="event_status" property="eventStatus" jdbcType="VARCHAR"/>
+        <result column="tx_type" property="txType" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="app_id" property="appId" jdbcType="VARCHAR"/>
+        <result column="record_status" property="recordStatus" jdbcType="VARCHAR"/>
+        <result column="biz_key" property="bizKey" jdbcType="VARCHAR"/>
+        <result column="created" property="created" jdbcType="TIMESTAMP"/>
+        <result column="updated" property="updated" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="queryEventListByStatus" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT id, event_type, event_status, tx_type, content,app_id, record_status, created, updated, biz_key
+        from base_event where event_status= #{eventStatus, jdbcType=VARCHAR} and record_status=0 limit 50
+    </select>
+
+
+    <select id="list" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT * from tb_category where status = 1
+        <if test="name != null">
+            AND name LIKE concat('%', #{name, jdbcType=VARCHAR}, '%')
+        </if>
+        ORDER BY updated DESC
+        limit #{start}, #{end}
+    </select>
+    <select id="list1" resultMap="BaseResultMap">
+        SELECT * from tb_category where status = 1 ORDER BY updated DESC
+    </select>
+
+    <select id="count" resultType="java.lang.Integer" parameterType="java.lang.String">
+        SELECT count(*) from tb_category WHERE status = 1
+        <if test="name != null">
+            AND name LIKE concat('%', #{name, jdbcType=VARCHAR}, '%')
+        </if>
+    </select>
+
+
+    <insert id="insert" parameterType="com.jesper.model.ItemCategory" useGeneratedKeys="true" keyProperty="id">
+           INSERT INTO tb_category (id, parent_id, name, status, sort_order, is_parent, created, updated)
+           value ( #{id, jdbcType=INTEGER},
+            null,
+            #{name, jdbcType=VARCHAR},
+            1,
+            null,
+            null,
+            #{created, jdbcType=TIMESTAMP},
+            #{updated, jdbcType=TIMESTAMP}
+           )
+    </insert>
+
+    <update id="update" parameterType="com.jesper.model.ItemCategory">
+           UPDATE tb_category SET
+           name = #{name, jdbcType=VARCHAR},
+           updated = now()
+            WHERE  id =  #{id, jdbcType=INTEGER}
+    </update>
+
+    <update id="updateEventStatusById" parameterType="com.jesper.model.ItemCategory">
+         PDATE base_event SET event_status = #{eventStatus, jdbcType=VARCHAR} where id = #{id, jdbcType=INTEGER} AND event_status =
+         #{eventStatus, jdbcType=VARCHAR}
+    </update>
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM tb_category WHERE id = #{id, jdbcType=INTEGER}
+    </delete>
+
+</mapper>
